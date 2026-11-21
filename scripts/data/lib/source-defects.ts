@@ -19,7 +19,7 @@ import type { TranslationId } from '../../../src/core/datasets/ids.ts';
  * upstream file that has since been fixed — in the second case the entry has done its job and
  * should go. And `data/sources.json` pins the SHA-256 of the exact archive entry each of these
  * was read out of, so the text cannot change under the list without somebody running
- * `npm run data:fetch -- --update` on purpose and looking at the diff.
+ * `bun run data:fetch -- --update` on purpose and looking at the diff.
  */
 /**
  * The translations this list can speak for: the ones imported from an eBible VPL file.

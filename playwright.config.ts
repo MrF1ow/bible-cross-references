@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import { DEPLOY_BASE } from './vite/site.ts';
 
-/** Where `npm run preview` serves the built site, base path and all. */
+/** Where `bun run preview` serves the built site, base path and all. */
 const PORT = 4173;
 export const BASE_URL = `http://localhost:${String(PORT)}${DEPLOY_BASE}`;
 
@@ -36,7 +36,7 @@ export default defineConfig({
   // The HTML report locally as well as on CI: it is the only way to look at a failed screenshot
   // comparison, which it shows as expected/actual/diff with a slider. `list` stays alongside it
   // so a run still says what it is doing in the terminal, and `open: 'never'` keeps it from
-  // launching a browser — `npm run test:report` does that when you want it. Both output
+  // launching a browser — `bun run test:report` does that when you want it. Both output
   // directories are gitignored.
   reporter: process.env['CI']
     ? [['github'], ['html', { open: 'never' }]]
@@ -75,8 +75,8 @@ export default defineConfig({
       dependencies: ['desktop', 'phone'],
     },
     // The gallery: a picture of every major screen, at the two sizes that matter. Kept out of
-    // `npm run test:e2e` because a baseline is tied to the machine that drew it — see
-    // tests/e2e/README.md. Run it with `npm run test:visual`.
+    // `bun run test:e2e` because a baseline is tied to the machine that drew it — see
+    // tests/e2e/README.md. Run it with `bun run test:visual`.
     {
       name: 'visual-desktop',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
@@ -89,7 +89,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run preview',
+    command: 'bun run preview',
     url: BASE_URL,
     reuseExistingServer: !process.env['CI'],
     timeout: 120_000,

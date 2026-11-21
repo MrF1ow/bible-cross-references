@@ -7,7 +7,7 @@
  * that never reached the file, a digest naming a file nobody has — passes a green suite.
  *
  * These checks read `public/data/`, which the repository does not carry: it is rebuilt by
- * `npm run data:build`. The unit gate runs beside the build rather than after it (see
+ * `bun run data:build`. The unit gate runs beside the build rather than after it (see
  * `.github/workflows/ci.yml`), so the datasets are often absent here and each check stands down
  * for the dataset it cannot find — by name, so the report says what went unchecked rather than
  * the file disappearing whole. `REQUIRE_BUILT_DATASETS=1` turns any absence into a failure, and
@@ -54,7 +54,7 @@ const required = process.env['REQUIRE_BUILT_DATASETS'] === '1';
 describe('the built translation datasets', () => {
   it.runIf(required)('are all present, because REQUIRE_BUILT_DATASETS is set', () => {
     const missing = TRANSLATION_IDS.filter((id) => !built.has(id));
-    expect(missing, 'run `npm run data:build` before this job').toEqual([]);
+    expect(missing, 'run `bun run data:build` before this job').toEqual([]);
   });
 
   describe.each(TRANSLATION_IDS)('%s', (id) => {
@@ -70,7 +70,7 @@ describe('the built translation datasets', () => {
       const entry = expectRecord(lock[sitePath], sitePath);
       expect(
         sha256Hex(readFileSync(datasetPath(id))),
-        'public/data is stale — run `npm run data:build`',
+        'public/data is stale — run `bun run data:build`',
       ).toBe(expectString(entry['sha256'], `${sitePath}.sha256`));
     });
 

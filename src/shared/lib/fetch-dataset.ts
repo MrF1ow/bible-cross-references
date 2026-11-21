@@ -26,7 +26,7 @@ export class DatasetUnavailableError extends Error {
   constructor(path: string, reason: string) {
     super(
       `Dataset "${path}" is unavailable (${reason}). ` +
-        'Generate the datasets with `npm run data` (see README.md).',
+        'Generate the datasets with `bun run data` (see README.md).',
     );
     this.name = 'DatasetUnavailableError';
     this.path = path;

@@ -24,7 +24,7 @@ export async function downloadPinnedSource(source: RawSource): Promise<Buffer> {
   if (sha256 !== source.sha256) {
     throw new Error(
       `${source.id}: the upstream file changed (expected SHA-256 ${source.sha256}, got ${sha256}).\n` +
-        '  Review the new version, then pin it with `npm run data:fetch -- --update`.',
+        '  Review the new version, then pin it with `bun run data:fetch -- --update`.',
     );
   }
   await writeFileAtomic(rawFilePath(source.fileName), content);

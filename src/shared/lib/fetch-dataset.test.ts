@@ -29,7 +29,7 @@ describe('fetchDataset', () => {
     respondWith('not found', { status: 404 });
     await expect(fetchDataset('data/missing.json')).rejects.toBeInstanceOf(DatasetUnavailableError);
     await expect(fetchDataset('data/missing.json')).rejects.toThrow(/HTTP 404/);
-    await expect(fetchDataset('data/missing.json')).rejects.toThrow(/npm run data/);
+    await expect(fetchDataset('data/missing.json')).rejects.toThrow(/bun run data/);
   });
 
   it('reports a network failure rather than letting it through raw', async () => {

@@ -6,6 +6,10 @@ See how the Bible is woven together, and read any passage with its connections i
 
 **▶ [Open Bible Cross-References](https://trekhleb.dev/bible-cross-references/)**
 
+> This is a fork of [trekhleb/bible-cross-references](https://github.com/trekhleb/bible-cross-references).
+> It runs on [Bun](https://bun.sh/) instead of npm and Node, and adds an [MCP server](#mcp-server)
+> so AI agents can read the same datasets. The app itself is unchanged.
+
 ## Why this exists
 
 For centuries, readers of the Bible have followed cross-references: the small notes in the margin
@@ -186,8 +190,8 @@ the accent is the whole difference between two books: `Jo` is the usual abbrevia
 `Jó` is Job. Typing without accents still works everywhere it is unambiguous — `genesis` finds
 Gênesis, `josue` finds Josué.
 
-**To add a language:** run `npm run locale:new -- es`, which writes every file it needs, then add
-it to the shared files the compiler and the test gate name between them. Work until `npm run check` is green — the gate
+**To add a language:** run `bun run locale:new -- es`, which writes every file it needs, then add
+it to the shared files the compiler and the test gate name between them. Work until `bun run check` is green — the gate
 lists what is left one item at a time, and nothing half-translated ships. Green means every slot
 is filled with something real, not that the words are right: what it cannot check, and what a
 reviewer who reads the language still has to, is in
@@ -290,7 +294,7 @@ every link.
 The smaller files are committed to [`data/raw/`](data/raw/) exactly as downloaded;
 [`data/sources.json`](data/sources.json) pins every source by SHA-256, and anything not committed
 (the larger archives — the eBible texts and the STEPBible word data) is downloaded by the build
-and checked against its pin, so a dataset is never built from a file nobody vouched for. `npm run dev` and `npm run build` turn them into the
+and checked against its pin, so a dataset is never built from a file nobody vouched for. `bun run dev` and `bun run build` turn them into the
 app's
 datasets in `public/data/` (generated, git-ignored), validated against the canonical KJV
 versification (31,102 verses).
@@ -298,19 +302,88 @@ versification (31,102 verses).
 To adopt a newer upstream version (OpenBible.info updates its vote counts from time to time):
 
 ```sh
-npm run data:fetch -- --update   # download and re-pin the new version
-npm run data:build               # rebuild, then review the numbers on /debug/
+bun run data:fetch -- --update   # download and re-pin the new version
+bun run data:build               # rebuild, then review the numbers on /debug/
 ```
 
 Then commit `data/raw/` and `data/sources.json`.
 
-## Development
+## MCP server
 
-Requirements: [Node.js](https://nodejs.org/) 24 or newer (see `.nvmrc`).
+[`mcp/`](mcp/) is a [Model Context Protocol](https://modelcontextprotocol.io/) server that gives an
+AI agent the explorer's datasets as tools. It reuses the app's own code: the dataset validators,
+the cross-reference index, the reference parser and the translation and word indexes. So an agent
+sees the same links, votes and text a reader does.
+
+Build the datasets once (`bun run data:build`, or any `bun run dev` / `bun run build`), then start
+the server one of two ways:
 
 ```sh
-npm install
-npm run dev
+bun run mcp        # stdio: for an agent on this machine that starts the server itself
+bun run mcp:http   # Streamable HTTP at http://127.0.0.1:3333/mcp, for agents elsewhere
+```
+
+| Tool                   | What it returns                                                                                                           |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `get_cross_references` | A passage's links, most-voted first, in either direction, with the linked text and a count by genre and by book           |
+| `get_passage`          | The text of a verse, a range or a chapter, in any of the six translations                                                 |
+| `get_original_words`   | The Hebrew or Greek words behind a verse: dictionary form, transliteration, gloss, Strong's number and how common each is |
+| `find_verses_by_word`  | Every verse that uses a Hebrew or Greek word, by Strong's number                                                          |
+| `search_text`          | Verses containing a word or phrase in one translation                                                                     |
+| `list_sources`         | The translations and datasets, with their licences and credits                                                            |
+
+References can be written the way people write them: `John 3:16`, `jn 3 16`, `Rom 8:28-30`,
+`Psalm 23`, `Gen 1-2` or OSIS (`Isa.53.5`). Book names can be in any language the interface speaks
+(`João 3:16`, `Joh 3,16`). The vote filter defaults to the explorer's own (at least 4 votes), and
+every result carries the attribution its licence asks for. Agents should pass that on when they
+quote the text.
+
+**Claude Code**, using stdio:
+
+```sh
+claude mcp add bible -- bun /path/to/bible-cross-references/mcp/server.ts
+```
+
+**Any MCP client**, using stdio:
+
+```json
+{
+  "mcpServers": {
+    "bible": { "command": "bun", "args": ["/path/to/bible-cross-references/mcp/server.ts"] }
+  }
+}
+```
+
+**Over HTTP.** The server is stateless and read-only, so any number of agents can share one
+instance. It listens on `127.0.0.1` by default. To reach it from other machines, set `HOST` and
+protect it with a token:
+
+```sh
+HOST=0.0.0.0 PORT=3333 MCP_AUTH_TOKEN=change-me bun run mcp:http
+claude mcp add --transport http bible http://your-host:3333/mcp \
+  --header "Authorization: Bearer change-me"
+```
+
+| Variable          | Default                            | Purpose                                                      |
+| ----------------- | ---------------------------------- | ------------------------------------------------------------ |
+| `BIBLE_SITE_ROOT` | `public/` (where the build writes) | The folder holding `data/`                                   |
+| `HOST`, `PORT`    | `127.0.0.1`, `3333`                | Where the HTTP server listens                                |
+| `MCP_AUTH_TOKEN`  | unset (no check)                   | When set, HTTP requests need `Authorization: Bearer <token>` |
+
+`GET /health` answers `{"ok":true}` without a token, for load balancers. Datasets load on first
+use and stay in memory: the cross-references and one translation take about 120 ms the first time,
+and later calls take a few milliseconds.
+
+## Development
+
+Requirements: [Bun](https://bun.sh/) 1.3 or newer. Bun installs the packages, runs the data
+scripts, Vite, TypeScript, ESLint and the unit tests. The one exception is the end-to-end suite:
+Playwright's test runner supports only Node, so `bun run test:e2e` needs
+[Node.js](https://nodejs.org/) 24 or newer (see `.nvmrc`) on the path as well.
+
+```sh
+bun install
+bun run dev
 ```
 
 Then open <http://localhost:5173/> for the app, or <http://localhost:5173/debug/> for an internal
@@ -318,16 +391,18 @@ page that shows the datasets behind it.
 
 | Script                  | Purpose                                                         |
 | ----------------------- | --------------------------------------------------------------- |
-| `npm run dev`           | Build the datasets and start the Vite dev server                |
-| `npm run build`         | Build the datasets, type-check, and build the site into `dist/` |
-| `npm run preview`       | Serve the built site locally, at its deployed path (see below)  |
-| `npm run data`          | Verify the raw files, or fetch missing ones, and build datasets |
-| `npm run check`         | The gate: type check, lint, format check, unit tests + coverage |
-| `npm run test`          | Run the unit tests                                              |
-| `npm run test:watch`    | Run the unit tests in watch mode                                |
-| `npm run test:coverage` | Run the unit tests and check the coverage thresholds            |
-| `npm run test:e2e`      | Run the end-to-end tests against the built site                 |
-| `npm run format`        | Format all files with Prettier                                  |
+| `bun run dev`           | Build the datasets and start the Vite dev server                |
+| `bun run build`         | Build the datasets, type-check, and build the site into `dist/` |
+| `bun run preview`       | Serve the built site locally, at its deployed path (see below)  |
+| `bun run data`          | Verify the raw files, or fetch missing ones, and build datasets |
+| `bun run check`         | The gate: type check, lint, format check, unit tests + coverage |
+| `bun run test`          | Run the unit tests                                              |
+| `bun run test:watch`    | Run the unit tests in watch mode                                |
+| `bun run test:coverage` | Run the unit tests and check the coverage thresholds            |
+| `bun run test:e2e`      | Run the end-to-end tests against the built site                 |
+| `bun run format`        | Format all files with Prettier                                  |
+| `bun run mcp`           | Start the MCP server on stdio (see [MCP server](#mcp-server))   |
+| `bun run mcp:http`      | Start the MCP server over HTTP at `http://127.0.0.1:3333/mcp`   |
 
 ### Project structure
 
@@ -348,6 +423,7 @@ src/cross-references/    Cross-reference plugins: manifests, registry, bidirecti
 src/app/                 The app: its views, the URL state and the view switch
 src/visualizations/      One folder per visualization (Arcs, Threads), plus shared blocks
 src/features/debug/      The /debug/ page
+mcp/                     The MCP server: the same datasets as tools for AI agents
 src/shared/              Reusable UI (footer, icons, tables), styles, formatting and loading
 tests/                   Repository-level tests, and tests/e2e/ the end-to-end suite
 ```
@@ -359,12 +435,12 @@ Visualizations never import each other; `src/app/views.ts` lists them, and the a
 Two suites, and a pull request has to pass both.
 
 ```sh
-npm run check      # types, lint, formatting, unit tests, coverage thresholds
-npm run test:e2e   # the flows, in a real browser against the built site
+bun run check      # types, lint, formatting, unit tests, coverage thresholds
+bun run test:e2e   # the flows, in a real browser against the built site
 ```
 
 **Unit tests** (`*.test.ts` beside the code, Vitest with happy-dom) cover the domain code, the
-data pipeline, the build plugins and the components. They are the gate on coverage: `npm run
+data pipeline, the build plugins and the components. They are the gate on coverage: `bun run
 check` fails below **98% of statements, lines and functions** (`test.coverage.thresholds` in
 `vite.config.ts`). Branches are held at 88% instead, because `noUncheckedIndexedAccess` makes
 TypeScript demand a fallback on every array read and most of those cannot happen.
@@ -379,7 +455,7 @@ covered by the end-to-end suite instead:
 - **Touch choreography and the views that host a canvas** (`use-bottom-sheet.ts`,
   `ArcsExplorer.tsx`, …): a fake DOM can be made to report any pointer path and any transform.
 
-**End-to-end tests** (`tests/e2e/`, Playwright against `npm run preview`) cover what only a real
+**End-to-end tests** (`tests/e2e/`, Playwright against `bun run preview`) cover what only a real
 browser can answer: that a reader can read a chapter, open a verse, follow a cross-reference, see
 the Hebrew and Greek, filter and switch translation; that the layout holds from 320px to 1920px;
 and that the offline cache stores the app, serves it with the network gone, and — the one failure
@@ -387,19 +463,19 @@ that could strand an audience on a stale version — **replaces itself when a ne
 They run in three projects: `desktop`, `phone` (Pixel 7), and `offline`, which runs last on its
 own because it rewrites the built worker to stand in for a new release.
 
-**The gallery** (`npm run test:visual`) photographs every major screen at desktop and phone size
+**The gallery** (`bun run test:visual`) photographs every major screen at desktop and phone size
 into `tests/e2e/visual.spec.ts-snapshots/` — open that folder to see what the app looks like. It
-is deliberately outside CI and outside `npm run test:e2e`, because a pixel baseline belongs to the
+is deliberately outside CI and outside `bun run test:e2e`, because a pixel baseline belongs to the
 machine that drew it; `tests/e2e/README.md` explains how to regenerate them.
 
-To run any of them locally you need the browser once: `npx playwright install --with-deps chromium`.
+To run any of them locally you need the browser once: `bunx playwright install --with-deps chromium`.
 
 ### Deployment
 
 The site is static. The CI workflow ([`.github/workflows/ci.yml`](.github/workflows/ci.yml))
 publishes every push to `main` with GitHub Pages, once all checks pass, at
 [trekhleb.dev/bible-cross-references](https://trekhleb.dev/bible-cross-references/), so production
-builds use the base path `/bible-cross-references/`, and `npm run preview` serves the build at
+builds use the base path `/bible-cross-references/`, and `bun run preview` serves the build at
 <http://localhost:4173/bible-cross-references/>. Besides the pages, the build writes:
 
 - the page metadata: canonical URLs, Open Graph and Twitter cards, and structured data;
@@ -441,7 +517,7 @@ previews and forks deployed elsewhere send nothing. To build for another locatio
 the origin:
 
 ```sh
-BASE_PATH=/ SITE_ORIGIN=https://example.org npm run build
+BASE_PATH=/ SITE_ORIGIN=https://example.org bun run build
 ```
 
 ## License

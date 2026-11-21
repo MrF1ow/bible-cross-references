@@ -3,7 +3,7 @@
 Unmodified copies of the upstream files the app is built from. The small ones are committed so
 that the site can be rebuilt even if an upstream URL disappears; the eBible archives are not,
 because 4–5 MB apiece is more than a repository should carry for one translation, so
-`npm run data:build` downloads them on demand instead. Either way `../sources.json` pins the file
+`bun run data:build` downloads them on demand instead. Either way `../sources.json` pins the file
 by SHA-256 and the build
 refuses anything that does not match it, before turning them into the datasets in `public/data/`.
 
@@ -162,7 +162,7 @@ work at Tyndale House, Cambridge, licensed under CC BY 4.0
 word used in each verse, keyed to KJV verse numbering, with psalm superscriptions (which that
 numbering has no slot for) left out. The 96 MB of tagged text is not committed
 here: STEPBible asks that it be fetched from them rather than passed on second-hand, which is also
-what `npm run data:build` does, against the pins in `../sources.json`.
+what `bun run data:build` does, against the pins in `../sources.json`.
 
 Attribution for the cross-references: _Cross-reference data: OpenBible.info
 (<https://www.openbible.info/labs/cross-references/>), licensed under CC BY 4.0
