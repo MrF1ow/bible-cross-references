@@ -1,4 +1,5 @@
 /// <reference types="vitest/config" />
+import { availableParallelism } from 'node:os';
 import { resolve } from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -57,6 +58,10 @@ export default defineConfig(({ command, isPreview = false }) => ({
     // Worker threads rather than child processes: the tests run on Bun (`bun --bun vitest`), and
     // Vitest's process pool calls an IPC method Bun's child processes do not have.
     pool: 'threads',
+    // At most 8 workers. Vitest's default is one per core minus one, and past about 8 Bun's
+    // workers slow each other down: on 16 cores the suite took 11.7s with 15 of them and 8.0s
+    // with 8, and a CPU-heavy test hit its 5s timeout. Machines with fewer cores keep the default.
+    maxWorkers: Math.max(1, Math.min(8, availableParallelism() - 1)),
     setupFiles: ['./src/test-utils/setup.ts'],
     coverage: {
       provider: 'v8',

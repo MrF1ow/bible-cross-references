@@ -3,7 +3,7 @@
 What a reader comes here to do, and the test that proves each one still works. The point of the
 list is that it is the complete set: if a flow is not here, nothing is watching it.
 
-Run them with `bun run test:e2e` (once: `bunx playwright install --with-deps chromium`).
+Run them with `bun run test:e2e` (once: `bun --bun playwright install --with-deps chromium`).
 
 ## Reading
 
@@ -215,8 +215,8 @@ one thing the Playwright viewer is better at. To make baselines that CI could sh
 same container CI uses:
 
 ```sh
-docker run --rm -v "$PWD":/w -w /w mcr.microsoft.com/playwright:v1.57.0-jammy \
-  bunx playwright test --project=visual-desktop --project=visual-phone --update-snapshots
+docker run --rm -v "$PWD":/w -w /w mcr.microsoft.com/playwright:v1.65.1-jammy \
+  npx playwright test --project=visual-desktop --project=visual-phone --update-snapshots
 ```
 
 ## Deliberately not here
