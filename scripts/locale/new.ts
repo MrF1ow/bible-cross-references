@@ -3,19 +3,19 @@ import { dirname, resolve } from 'node:path';
 import { LOCALE_IDS } from '../../src/i18n/locale-id.ts';
 
 /**
- * Starts a new language: `npm run locale:new es`.
+ * Starts a new language: `bun run locale:new es`.
  *
  * It writes one file per thing a language has to say, each of them still English, and then
  * prints the handful of shared files that need a line adding. Nothing here translates anything —
  * the point is that every file exists and compiles, so that from this moment on the compiler and
- * `npm run check` can say exactly what is left:
+ * `bun run check` can say exactly what is left:
  *
  * - the compiler names every `Record<LocaleId, …>` still missing an entry;
  * - `src/i18n/completeness.test.ts` names every word still in English, every blank, every book
  *   whose spelling two books claim, and every case the acceptance table has to pin.
  *
  * So the way to add a language is: run this, add the lines it prints, then work until
- * `npm run check` is green. Green means finished — there is no half-finished state that ships.
+ * `bun run check` is green. Green means finished — there is no half-finished state that ships.
  */
 
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -28,17 +28,17 @@ function fail(message: string): never {
 }
 
 if (id === undefined || !/^[a-z]{2,3}$/.test(id)) {
-  fail('Usage: npm run locale:new -- <id>, where <id> is a language tag such as "es" or "uk".');
+  fail('Usage: bun run locale:new -- <id>, where <id> is a language tag such as "es" or "uk".');
 }
 if ((LOCALE_IDS as readonly string[]).includes(id)) {
-  fail(`${id} is already in LOCALE_IDS. Run \`npm run check\` to see what is left to translate.`);
+  fail(`${id} is already in LOCALE_IDS. Run \`bun run check\` to see what is left to translate.`);
 }
 
 const NOTE = (what: string) =>
   `/**
  * ${what}
  *
- * TODO: translate. Every value below is still English, which is what \`npm run check\` reports —
+ * TODO: translate. Every value below is still English, which is what \`bun run check\` reports —
  * it lists each one by name until all of them have been replaced. Delete this note when they have.
  */`;
 
@@ -63,7 +63,7 @@ ${NOTE('The books in this language.')}
  * accents are folded away, so an entry needs no accents of its own — except where folding would
  * bring two books together, as Portuguese \`Jo\` (João) and \`Jó\` (Job) do. Where it does, each
  * book has to claim its own spelling exactly, and \`src/i18n/books/acceptance.ts\` has to say
- * which book a reader typing it without the accent reaches. \`npm run check\` names those cases.
+ * which book a reader typing it without the accent reaches. \`bun run check\` names those cases.
  */
 export const ${id}Books: BookNames = { ...enBooks };
 `,
@@ -119,9 +119,9 @@ Now add ${id} to the files every language shares. The compiler will name any you
 
 Then:
 
-  npm run check               lists everything still untranslated, by name
-  npm run build               writes ${id}/index.html and ${id}/threads/index.html
-  npm run test:e2e            opens /${id}/ in a real browser
+  bun run check               lists everything still untranslated, by name
+  bun run build               writes ${id}/index.html and ${id}/threads/index.html
+  bun run test:e2e            opens /${id}/ in a real browser
 
 Green means every slot is filled with something real — not that the words are right. A reviewer
 who reads the language is still required: see CONTRIBUTING.md → "Adding a language".

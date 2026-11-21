@@ -369,7 +369,7 @@ describe('the pins and the importers', () => {
   });
 
   it('names an upstream download, and a real licence, for every source', async () => {
-    // `url` is what `npm run data:fetch` downloads and re-pins, and `license` is what the README
+    // `url` is what `bun run data:fetch` downloads and re-pins, and `license` is what the README
     // table, the credit in the app and a maintainer deciding whether a text can ship all read.
     // A `url` that is not one cannot be fetched or re-pinned, so its checksum stops being
     // something a fetch verified and becomes a number somebody typed beside a file.

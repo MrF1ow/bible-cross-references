@@ -18,7 +18,7 @@ writeLocaleEntries();
 // https://vite.dev/config/
 export default defineConfig(({ command, isPreview = false }) => ({
   // The dev server runs at the root; builds, and their preview, at the deployed sub-path, so a
-  // path that ignores the base breaks in `npm run preview` rather than in production. Runtime code
+  // path that ignores the base breaks in `bun run preview` rather than in production. Runtime code
   // builds every URL from `import.meta.env.BASE_URL`.
   base: process.env['BASE_PATH'] ?? (command === 'build' || isPreview ? DEPLOY_BASE : '/'),
   define: {
@@ -50,15 +50,19 @@ export default defineConfig(({ command, isPreview = false }) => ({
       'scripts/**/*.test.ts',
       'vite/**/*.test.ts',
       'tests/**/*.test.ts',
+      'mcp/**/*.test.ts',
     ],
     // A DOM for the components; the pipeline's tests use Node's APIs, which are still here.
     environment: 'happy-dom',
+    // Worker threads rather than child processes: the tests run on Bun (`bun --bun vitest`), and
+    // Vitest's process pool calls an IPC method Bun's child processes do not have.
+    pool: 'threads',
     setupFiles: ['./src/test-utils/setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text-summary', 'html', 'lcov'],
-      include: ['src/**/*.{ts,tsx}', 'scripts/data/**/*.ts', 'vite/**/*.ts'],
-      // The gate: `npm run check` fails below these, so a change that adds untested code is
+      include: ['src/**/*.{ts,tsx}', 'scripts/data/**/*.ts', 'vite/**/*.ts', 'mcp/**/*.ts'],
+      // The gate: `bun run check` fails below these, so a change that adds untested code is
       // caught before review. Branches sit lower on purpose — `noUncheckedIndexedAccess` makes
       // TypeScript demand a fallback on every array read (`counts[verse] ?? 0`), and most of
       // those fallbacks cannot happen, so the last few points would be tests of nothing.
@@ -72,6 +76,7 @@ export default defineConfig(({ command, isPreview = false }) => ({
         'src/features/debug/main.tsx',
         'scripts/data/build.ts',
         'scripts/data/fetch.ts',
+        'mcp/server.ts',
         // Drawing code that needs a GPU: a WebGL context, shaders and canvas painting cannot be
         // exercised in this environment, and a mock of them would test the mock.
         'src/visualizations/arcs/arc-scene.ts',
@@ -91,7 +96,7 @@ export default defineConfig(({ command, isPreview = false }) => ({
         // Touch choreography and the views that host a GPU canvas. A fake DOM can be made to
         // report any pointer path and any transform, so a test here would mostly be checking
         // the fake; these are covered by the end-to-end suite in a real browser instead
-        // (tests/e2e/, `npm run test:e2e`).
+        // (tests/e2e/, `bun run test:e2e`).
         'src/visualizations/shared/use-bottom-sheet.ts',
         'src/visualizations/arcs/ArcsExplorer.tsx',
         'src/visualizations/threads/ThreadsExplorer.tsx',

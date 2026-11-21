@@ -34,7 +34,7 @@ export function VizDataBoundary({ children }: VizDataBoundaryProps) {
       fallback={(error, reset) => (
         <div role="alert" style={{ padding: 'var(--space-6)' }}>
           {/* A `DatasetUnavailableError` carries a developer's sentence — it names the file
-              and says to run `npm run data` — which is the wrong thing to show a reader, and
+              and says to run `bun run data` — which is the wrong thing to show a reader, and
               in the wrong language. Anything else is a real fault worth reading verbatim. */}
           <p>
             {error instanceof DatasetUnavailableError

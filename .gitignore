@@ -10,7 +10,7 @@ coverage/
 # language needs no line here.
 
 # Data: the upstream files (data/raw/) are committed; the datasets built from them are not, since
-# `npm run dev` and `npm run build` rebuild them (see README.md → "Data").
+# `bun run dev` and `bun run build` rebuild them (see README.md → "Data").
 public/data/
 # Except these: 4-5 MB of archive apiece for one translation is not worth keeping in the
 # repository, so the build downloads them on demand and checks each against its pin in

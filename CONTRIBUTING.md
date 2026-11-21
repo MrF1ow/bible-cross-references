@@ -9,22 +9,22 @@ Both of these run in CI on every pull request, and both have to be green before 
 merged or deployed.
 
 ```sh
-npm run check      # types, lint, formatting, unit tests, coverage thresholds
-npm run test:e2e   # the reader's flows, in a real browser against the built site
+bun run check      # types, lint, formatting, unit tests, coverage thresholds
+bun run test:e2e   # the reader's flows, in a real browser against the built site
 ```
 
-`npm run check` is most of what CI runs, so if it passes locally it almost certainly passes there.
-The exception is the generated datasets: `npm run check` never reads them, because it runs beside
-the build rather than after it, so CI has one further gate — `npm run test:built`, after
-`npm run data:build`, which checks the real scripture rather than a fixture. Run those two
-together after any change to `data/sources.json`, an importer or a translation. `npm run check`
+`bun run check` is most of what CI runs, so if it passes locally it almost certainly passes there.
+The exception is the generated datasets: `bun run check` never reads them, because it runs beside
+the build rather than after it, so CI has one further gate — `bun run test:built`, after
+`bun run data:build`, which checks the real scripture rather than a fixture. Run those two
+together after any change to `data/sources.json`, an importer or a translation. `bun run check`
 fails on:
 
 - a TypeScript error (the config is strict, including `noUncheckedIndexedAccess` and
   `exactOptionalPropertyTypes`; there is no `any` and no `!`, and `as` appears only where
-  `Object.fromEntries` loses a key type — `npm run typecoverage` holds the line);
+  `Object.fromEntries` loses a key type — `bun run typecoverage` holds the line);
 - an ESLint error (type-aware rules, so a floating promise or an unsafe value fails the build);
-- a file Prettier would reformat — run `npm run format`;
+- a file Prettier would reformat — run `bun run format`;
 - a failing unit test;
 - **coverage below 98%** of statements, lines and functions.
 
@@ -33,7 +33,7 @@ be unit-tested — GPU drawing, touch gestures, a page entry point — cover it 
 instead and say so in the pull request; the exclusion list in `vite.config.ts` explains the three
 categories that are already treated this way.
 
-The end-to-end suite needs the browser once: `npx playwright install --with-deps chromium`.
+The end-to-end suite needs the browser once: `bunx playwright install --with-deps chromium`.
 
 ## Conventions
 
@@ -45,7 +45,7 @@ verse of a chapter given without one')`, not `it('calls indexOf')`.
   them; a repository test enforces it.
 - **Data is pinned.** Upstream files are fetched against a SHA-256 in `data/sources.json` and the
   build refuses a file that does not match. Changing a source means re-pinning deliberately, with
-  `npm run data:fetch -- --update`, and saying in the pull request what changed upstream.
+  `bun run data:fetch -- --update`, and saying in the pull request what changed upstream.
 
 ## Translations
 
@@ -56,7 +56,7 @@ Two different jobs, and they are independent.
 Start with the scaffold, which writes every file a language needs, each of them still English:
 
 ```sh
-npm run locale:new -- es
+bun run locale:new -- es
 ```
 
 Then add the language to the six files every language shares. The compiler names each one you
@@ -72,7 +72,7 @@ miss, by file and by property:
 | `src/i18n/same-as-english.ts`  | `{}` to start with                                                    |
 | `src/app/url-contract.test.ts` | a `SAVED` row for `?lang=<id>` and one for `/<id>/`                   |
 
-From there, work until `npm run check` is green. **Green means finished.** There is no
+From there, work until `bun run check` is green. **Green means finished.** There is no
 half-finished state that ships: a language the app offers is a language a reader chooses, and
 choosing Spanish and getting English menus is worse than not being offered it. The English
 fallback in `translate.ts` is a safety net while you write, not a way to release.
@@ -114,7 +114,7 @@ reads the language is still the only thing standing between these and a reader:
   says whether it is a stand-in. Nothing can read the words drawn on it.
 
 A Bible text is checked more loosely than a language: the registry forces the bookkeeping, and
-the verse numbering is enforced when the dataset is built. `npm run test:built` adds that the
+the verse numbering is enforced when the dataset is built. `bun run test:built` adds that the
 built file carries a licence and a credit at all, that its provenance is the pin the build
 verified, and that no bracket is left open across two verses — but whether the licence named is
 the right one, whether the credit is accurate, and the reading direction are still taken on
@@ -147,7 +147,7 @@ different verses, and a text that carries no markers at all has not thereby been
 ### Layout
 
 A new language should come with its layout checked, not only its words: translated text is often
-longer than English, and the header and footer are tight at 320px. `npm run test:e2e` walks twelve
+longer than English, and the header and footer are tight at 320px. `bun run test:e2e` walks twelve
 widths and insists the footer stays on one line with a font a tenth wider than the one it is
 measured on, and that no panel scrolls sideways in any language the app offers.
 

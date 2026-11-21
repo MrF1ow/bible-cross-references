@@ -2,8 +2,8 @@
  * Downloads the raw source files listed in `data/sources.json` into `data/raw/` and verifies them
  * against their pinned SHA-256 checksums.
  *
- *   npm run data:fetch               download missing or outdated files, verify checksums
- *   npm run data:fetch -- --update   accept new upstream versions and re-pin their checksums
+ *   bun run data:fetch               download missing or outdated files, verify checksums
+ *   bun run data:fetch -- --update   accept new upstream versions and re-pin their checksums
  */
 import { parseArgs } from 'node:util';
 import { download } from './lib/download.ts';
@@ -35,7 +35,7 @@ async function fetchSource(source: RawSource): Promise<RawSource> {
   if (!options.update) {
     throw new Error(
       `${source.id}: the upstream file changed (expected SHA-256 ${source.sha256}, got ${sha256}).\n` +
-        '  Review the new version, then pin it with `npm run data:fetch -- --update`.',
+        '  Review the new version, then pin it with `bun run data:fetch -- --update`.',
     );
   }
   await writeFileAtomic(path, content);

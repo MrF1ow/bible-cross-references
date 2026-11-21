@@ -1,7 +1,7 @@
 /**
  * Builds the app's datasets from the raw source files: `data/raw/` → `public/data/`.
  *
- *   npm run data:build
+ *   bun run data:build
  *
  * Each dataset is produced by an importer that validates the raw data against the canonical
  * versification and fails loudly on anything unexpected.
@@ -30,7 +30,7 @@ const readSource: RawSourceReader = async (sourceId) => {
     (await downloadPinnedSource(source));
   if (pinnedDigest(source, content) !== source.sha256) {
     throw new Error(
-      `Raw file for "${sourceId}" does not match its pinned checksum. Run \`npm run data:fetch\`.`,
+      `Raw file for "${sourceId}" does not match its pinned checksum. Run \`bun run data:fetch\`.`,
     );
   }
   return { source, content };

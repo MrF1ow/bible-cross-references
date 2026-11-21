@@ -107,7 +107,7 @@ describe('VizDataBoundary', () => {
     expect(alert.textContent).toContain('could not be loaded');
     // And in the reader's own words, not the importer's: the underlying error names the file and
     // tells whoever is reading it to run a build script, which is no use to someone on a train.
-    expect(alert.textContent).not.toContain('npm run data');
+    expect(alert.textContent).not.toContain('bun run data');
     expect(alert.textContent).not.toContain('data/translations');
     expect(screen.getByRole('button', { name: /Retry/ })).toBeDefined();
   });

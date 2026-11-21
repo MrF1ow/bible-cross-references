@@ -2,7 +2,7 @@
  * Measures how much of the code the type checker actually knows the type of, and fails below a
  * floor.
  *
- *   node scripts/type-coverage.ts [--at-least 98] [--list]
+ *   bun scripts/type-coverage.ts [--at-least 98] [--list]
  *
  * `tsc` passing is not the same as the code being typed. `strict` stops TypeScript *inferring*
  * `any` silently, but a value can still arrive as `any` from an untyped boundary — `JSON.parse`,

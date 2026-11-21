@@ -516,7 +516,7 @@ describe('the gate catches a language that is not finished', () => {
   });
 
   /**
-   * What `npm run locale:new` leaves behind: every file in place and compiling, every word still
+   * What `bun run locale:new` leaves behind: every file in place and compiling, every word still
    * English. This is the state a contributor starts from, and the gate has to describe it rather
    * than merely reject it — the list it prints is the to-do list.
    */

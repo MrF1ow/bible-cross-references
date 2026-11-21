@@ -21,7 +21,7 @@ import { SITE_PAGE_IDS, type SiteCopy } from './site-copy.ts';
  *
  * Written as functions over data rather than over `LOCALE_IDS`, for two reasons: a deliberately
  * broken fixture can be fed to the same checks, so that the gate is known to fail and not merely
- * believed to pass; and the scaffold (`npm run locale:new`) can report what is left to do using
+ * believed to pass; and the scaffold (`bun run locale:new`) can report what is left to do using
  * exactly the rules CI will apply.
  */
 

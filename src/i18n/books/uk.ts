@@ -11,7 +11,7 @@ import type { BookNames } from './types.ts';
  * folded away, and Ukrainian folds further than most: `ї` becomes `і` and `й` becomes `и`, so
  * `Йов` is found by `иов` as well as by `йов`. That costs nothing here because no two books come
  * together under it — `bookNameCollisions` is what says so, and it runs over this file in
- * `npm run check`.
+ * `bun run check`.
  */
 export const ukBooks: BookNames = {
   Gen: { name: 'Буття', abbreviation: 'Бут', aliases: ['бут', 'бт'] },

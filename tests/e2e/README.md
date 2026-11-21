@@ -3,7 +3,7 @@
 What a reader comes here to do, and the test that proves each one still works. The point of the
 list is that it is the complete set: if a flow is not here, nothing is watching it.
 
-Run them with `npm run test:e2e` (once: `npx playwright install --with-deps chromium`).
+Run them with `bun run test:e2e` (once: `bunx playwright install --with-deps chromium`).
 
 ## Reading
 
@@ -114,7 +114,7 @@ not. Pictures are a separate suite — below.
 
 ## The gallery
 
-`npm run test:visual` photographs every major screen at a desktop size (1440×900) and on a phone
+`bun run test:visual` photographs every major screen at a desktop size (1440×900) and on a phone
 (Pixel 7), and writes them to `tests/e2e/visual.spec.ts-snapshots/`. Open that folder to see what
 the app currently looks like; a change to one of those files in a diff is a change to the app.
 
@@ -175,12 +175,12 @@ canvas behind them, which is why a translation needs five pictures and not forty
 Each file is suffixed with the project and platform (`-visual-phone-linux.png`), so baselines made
 on macOS and on Linux sit side by side rather than overwriting each other.
 
-**This suite is not part of `npm run test:e2e` or of CI**, on purpose: a baseline belongs to the
+**This suite is not part of `bun run test:e2e` or of CI**, on purpose: a baseline belongs to the
 machine that drew it, and a font update on a runner would turn the main gate red for no reason.
 The first run on a new machine writes its own baselines and reports them as failures — that is
 Playwright saying "nothing to compare against yet", not a problem with the app.
 
-After a deliberate design change, re-photograph with `npm run test:visual:update` and look at the
+After a deliberate design change, re-photograph with `bun run test:visual:update` and look at the
 new images before committing them. Prefer `--update-snapshots=all` when the change is one you
 expect to be small: the bare flag only rewrites a shot whose comparison _fails_, and the budget
 that keeps the arcs stable from run to run (2% of the pixels — about 7,500 on a phone) is wider
@@ -188,7 +188,7 @@ than most text changes, so a real change can compare equal and leave the picture
 a layout the app no longer has. That has happened here.
 
 ```sh
-npm run test:visual -- --update-snapshots=all
+bun run test:visual -- --update-snapshots=all
 ```
 
 ### Looking at a before and after
@@ -200,8 +200,8 @@ and let the suite fail against them.
 ```sh
 git switch -c visual-review && git add -A && git commit -m "wip"   # the safety net
 git checkout HEAD~1 -- tests/e2e/visual.spec.ts-snapshots          # the old pictures
-npm run test:visual                                                # fails where it changed
-npm run test:report                                                # the viewer
+bun run test:visual                                                # fails where it changed
+bun run test:report                                                # the viewer
 git checkout HEAD -- tests/e2e/visual.spec.ts-snapshots            # the new ones back
 ```
 
@@ -216,7 +216,7 @@ same container CI uses:
 
 ```sh
 docker run --rm -v "$PWD":/w -w /w mcr.microsoft.com/playwright:v1.57.0-jammy \
-  npx playwright test --project=visual-desktop --project=visual-phone --update-snapshots
+  bunx playwright test --project=visual-desktop --project=visual-phone --update-snapshots
 ```
 
 ## Deliberately not here
