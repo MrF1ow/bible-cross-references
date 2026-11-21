@@ -376,10 +376,10 @@ and later calls take a few milliseconds.
 
 ## Development
 
-Requirements: [Bun](https://bun.sh/) 1.3 or newer. Bun installs the packages, runs the data
-scripts, Vite, TypeScript, ESLint and the unit tests. The one exception is the end-to-end suite:
-Playwright's test runner supports only Node, so `bun run test:e2e` needs
-[Node.js](https://nodejs.org/) 24 or newer (see `.nvmrc`) on the path as well.
+Requirements: [Bun](https://bun.sh/) 1.3 or newer, and nothing else. Bun installs the packages
+and runs everything: the data scripts, Vite, TypeScript, ESLint, the unit tests and, since
+Playwright 1.65, the end-to-end tests too. CI pins the Bun version Playwright tests itself with
+(`packageManager` in `package.json`).
 
 ```sh
 bun install
@@ -468,7 +468,7 @@ into `tests/e2e/visual.spec.ts-snapshots/` — open that folder to see what the 
 is deliberately outside CI and outside `bun run test:e2e`, because a pixel baseline belongs to the
 machine that drew it; `tests/e2e/README.md` explains how to regenerate them.
 
-To run any of them locally you need the browser once: `bunx playwright install --with-deps chromium`.
+To run any of them locally you need the browser once: `bun --bun playwright install --with-deps chromium`.
 
 ### Deployment
 

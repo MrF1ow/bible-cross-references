@@ -33,7 +33,7 @@ be unit-tested — GPU drawing, touch gestures, a page entry point — cover it 
 instead and say so in the pull request; the exclusion list in `vite.config.ts` explains the three
 categories that are already treated this way.
 
-The end-to-end suite needs the browser once: `bunx playwright install --with-deps chromium`.
+The end-to-end suite needs the browser once: `bun --bun playwright install --with-deps chromium`.
 
 ## Conventions
 

@@ -114,10 +114,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
-      # Playwright's runner supports Node only, so the browser jobs keep it beside Bun.
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
       - run: bun install --frozen-lockfile
       - name: Take the site the build job made
         uses: actions/download-artifact@v8
@@ -136,9 +132,9 @@ jobs:
       # service worker and WebGL both need a real engine rather than three of them. The system
       # libraries it links against are not in the cache, so that part runs either way.
       - name: Install the browser
-        run: bunx playwright install --with-deps chromium
+        run: bun --bun playwright install --with-deps chromium
       - name: Run the reader's flows
-        run: bunx playwright test --project=desktop --project=phone --shard=${{ matrix.shard }}/5
+        run: bun --bun playwright test --project=desktop --project=phone --shard=${{ matrix.shard }}/5
       - name: Keep the report when something failed
         if: failure()
         uses: actions/upload-artifact@v7
@@ -165,10 +161,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
-      # Playwright's runner supports Node only, so the browser jobs keep it beside Bun.
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
       - run: bun install --frozen-lockfile
       - name: Take the site the build job made
         uses: actions/download-artifact@v8
@@ -181,8 +173,8 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('bun.lock') }}
       - name: Install the browser
-        run: bunx playwright install --with-deps chromium
-      - run: bunx playwright test --project=offline --no-deps
+        run: bun --bun playwright install --with-deps chromium
+      - run: bun --bun playwright test --project=offline --no-deps
       - name: Keep the report when something failed
         if: failure()
         uses: actions/upload-artifact@v7
